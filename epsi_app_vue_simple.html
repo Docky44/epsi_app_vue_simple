@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pays du monde</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <style>
+      #app {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      input[type="text"] {
+        padding: 8px;
+        margin-bottom: 10px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      button {
+        margin-bottom: 10px;
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+
+      p {
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <h1>Pays du Monde</h1>
+
+      <input
+        type="text"
+        v-model="searchQuery"
+        placeholder="Rechercher un pays"
+      />
+
+      <button @click="fetchCountries">Charger les pays</button>
+
+      <button @click="filterFrance">Filtrer la France</button>
+
+      <table v-if="countries.length > 0">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Capitale</th>
+            <th>Région</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="country in filteredCountries" :key="country.alpha3Code">
+            <td>{{ country.name.common }}</td>
+            <td>
+              {{ Array.isArray(country.capital) ? country.capital[0] :
+              country.capital }}
+            </td>
+            <td>{{ country.region }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p v-if="filteredCountries.length === 0 && countries.length > 0">
+        Aucun pays trouvé.
+      </p>
+
+      <p v-else-if="loading">Chargement en cours...</p>
+
+      <p v-else-if="error">Une erreur est survenue : {{ error }}</p>
+    </div>
+
+    <script>
+      new Vue({
+        el: "#app",
+        data() {
+          return {
+            countries: [],
+            loading: false,
+            error: null,
+            showFrance: false,
+            searchQuery: "",
+          };
+        },
+        methods: {
+          fetchCountries() {
+            this.loading = true;
+            fetch("https://restcountries.com/v3.1/all")
+              .then((response) => {
+                if (!response.ok) {
+                  throw Error("Erreur lors de la récupération des pays");
+                }
+                return response.json();
+              })
+              .then((data) => {
+                this.loading = false;
+                this.countries = data;
+              })
+              .catch((error) => {
+                this.loading = false;
+                this.error = error.message;
+              });
+          },
+          filterFrance() {
+            this.showFrance = !this.showFrance;
+          },
+        },
+        computed: {
+          filteredCountries() {
+            let filtered = this.countries;
+
+            if (this.showFrance) {
+              filtered = filtered.filter(
+                (country) => country.name.common === "France"
+              );
+            }
+
+            if (this.searchQuery) {
+              const searchTerm = this.searchQuery.toLowerCase();
+              filtered = filtered.filter(
+                (country) =>
+                  (country.name.common &&
+                    typeof country.name.common === "string" &&
+                    country.name.common.toLowerCase().includes(searchTerm)) ||
+                  (country.alpha3Code &&
+                    typeof country.alpha3Code === "string" &&
+                    country.alpha3Code.toLowerCase().includes(searchTerm)) ||
+                  (country.capital &&
+                    typeof country.capital === "string" &&
+                    country.capital.toLowerCase().includes(searchTerm)) ||
+                  (country.region &&
+                    typeof country.region === "string" &&
+                    country.region.toLowerCase().includes(searchTerm))
+              );
+            }
+
+            return filtered;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
