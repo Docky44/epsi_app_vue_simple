@@ -144,12 +144,15 @@
                   (country.name.common &&
                     typeof country.name.common === "string" &&
                     country.name.common.toLowerCase().includes(searchTerm)) ||
-                  (country.alpha3Code &&
-                    typeof country.alpha3Code === "string" &&
-                    country.alpha3Code.toLowerCase().includes(searchTerm)) ||
                   (country.capital &&
-                    typeof country.capital === "string" &&
-                    country.capital.toLowerCase().includes(searchTerm)) ||
+                    ((typeof country.capital === "string" &&
+                      country.capital.toLowerCase().includes(searchTerm)) ||
+                      (Array.isArray(country.capital) &&
+                        country.capital.some(
+                          (capital) =>
+                            typeof capital === "string" &&
+                            capital.toLowerCase().includes(searchTerm)
+                        )))) ||
                   (country.region &&
                     typeof country.region === "string" &&
                     country.region.toLowerCase().includes(searchTerm))
