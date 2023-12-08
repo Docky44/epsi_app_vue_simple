@@ -70,6 +70,7 @@
   <table v-if="countries.length > 0">
     <thead>
     <tr>
+      <th>Drapeau</th>
       <th>Nom</th>
       <th>Capitale</th>
       <th>Région</th>
@@ -77,6 +78,10 @@
     </thead>
     <tbody>
     <tr v-for="country in filteredCountries" :key="country.alpha3Code">
+    <tr v-for="country in filteredCountries" :key="country.alpha3Code">
+      <td>
+        <img :src="country.flags.png" alt="Drapeau" style="width: 30px; height: auto;" />
+      </td>
       <td>{{ country.name.common }}</td>
       <td>
         {{ Array.isArray(country.capital) ? country.capital[0] : country.capital }}
